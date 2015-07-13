@@ -20,7 +20,7 @@ This may be parameterized in the future.
 ## Usage
 
     cp vancity.personal.edn.template vancity.personal.edn
-    lein run personal vancity.config.edn > transactions.ofx
+    lein run personal vancity.personal.edn > transactions.ofx
 
 ## Todo
 
