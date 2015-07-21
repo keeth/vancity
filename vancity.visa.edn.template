@@ -1,0 +1,6 @@
+{:username  "myname"
+ :password "mypass"
+ :answers {"What was the name of your first pet?" "ferdinand",
+           "In what city or town was your first job?" "burnaby",
+           "In what city did you meet your spouse/significant other?" "langley",
+           "What is the middle name of your oldest child?" "snoopy"}}

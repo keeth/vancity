@@ -30,16 +30,41 @@
   (let [url (attribute "#DownloadWarning" :action)
         http-cookies (to-http-cookies (cookies))
         response (client/post url {:cookies http-cookies
-                                   :proxy-host "127.0.0.1"
-                                   :proxy-port 48888
-                                   :insecure? true
                                    :form-params {:CONTINUE_DOWNLOAD "Continue"}
                                    :force-redirects true
                                    })]
       (println (response :body))
     )
-  (close)
-  (System/exit 0))
+  (close))
+
+(defn visa-answer-question [config]
+  (let [question (text (find-element {:xpath "//*[text() = 'Security Question']/following-sibling::*"}))
+        answer (get (:answers config) question)]
+    (quick-fill-submit {"input[name=hintanswer]" answer}
+                       {"input[name=hintanswer]" submit})))
+
+(defn vancity-visa
+  "Get latest transactions from personal bank account"
+  [config]
+  (set-driver! {:browser :chrome} "https://www.myvisaaccount.com/")
+  (quick-fill-submit {"input[name=username]" (:username config)}
+                     {"input[name=password]" (:password config)}
+                     {"input[name=button]" click})
+  (visa-answer-question config)
+  (visa-answer-question config)
+  (if (exists? "form[name=downLoadTransactionForm]")
+    (let [url (attribute "form[name=downLoadTransactionForm]" :action)
+          token (attribute "form[name=downLoadTransactionForm] input[name='org.apache.struts.taglib.html.TOKEN']" :value)
+          http-cookies (to-http-cookies (cookies))
+          response (client/post url {:cookies http-cookies
+                                     :form-params {:downloadType "ofx"
+                                                   "org.apache.struts.taglib.html.TOKEN" token}
+                                     :force-redirects true
+                                     })]
+      (println (response :body)))
+    (throw (RuntimeException. "No transactions for current period")))
+  (close))
+
 
 (defn -main
   "Download OFX transactions from Vancity bank account or Vancity VISA account"
@@ -50,5 +75,6 @@
       (throw (RuntimeException. "Usage: lein run (personal|visa) config.edn")))
     (case account-type-kw
       :personal (vancity-personal-banking (load-file config-file))
-      :visa (throw (RuntimeException. "Not implemented yet"))
-      (throw (RuntimeException. "The only recognized account-types are :personal and :visa")))))
+      :visa (vancity-visa (load-file config-file))
+      (throw (RuntimeException. "The only recognized account-types are :personal and :visa"))))
+  (System/exit 0))

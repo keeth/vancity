@@ -20,11 +20,14 @@ This may be parameterized in the future.
 ## Usage
 
     cp vancity.personal.edn.template vancity.personal.edn
-    lein run personal vancity.personal.edn > transactions.ofx
+    lein run personal vancity.personal.edn > personal-transactions.ofx
+    
+    cp vancity.visa.edn.template vancity.visa.edn
+    lein run visa vancity.visa.edn > visa-transactions.ofx
+
 
 ## Todo
 
-* Vancity VISA
 * Make Selenium options configurable
 * Expose options like name of sub-account, and date range.
 * Put core into a library, if it makes sense to do that.
